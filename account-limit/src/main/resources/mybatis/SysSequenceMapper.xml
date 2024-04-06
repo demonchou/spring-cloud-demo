@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.stori.account.web.module.domain.mapper.SysSequenceMapper">
+    <resultMap id="sysSequenceMap" type="cn.com.stori.account.web.module.domain.entity.SysSequence">
+        <result property="sequenceName" column="SEQUENCE_NAME"/>
+        <result property="startBy" column="START_BY"/>
+        <result property="incrementBy" column="INCREMENT_BY"/>
+        <result property="lastNumber" column="LAST_NUMBER"/>
+    </resultMap>
+
+    <sql id="allCols">
+        SEQUENCE_NAME, START_BY, INCREMENT_BY, LAST_NUMBER
+    </sql>
+
+    <select id="getSysdate" resultType="java.util.Date">
+        <![CDATA[
+		select current_timestamp()
+        ]]>
+    </select>
+
+    <update id="updateSeqByIncrement" parameterType="string">
+        update SYS_SEQUENCES
+        set LAST_NUMBER = if(LAST_NUMBER = 0, last_insert_id(START_BY + INCREMENT_BY), last_insert_id(LAST_NUMBER + INCREMENT_BY))
+        where SEQUENCE_NAME = #{sequenceName}
+    </update>
+
+    <select id="getAllSequenceList" resultMap="sysSequenceMap">
+        select
+        <include refid="allCols"/>
+        from SYS_SEQUENCES
+    </select>
+
+    <select id="getSequenceByName" resultMap="sysSequenceMap">
+        select
+        <include refid="allCols"/>
+        from SYS_SEQUENCES where SEQUENCE_NAME = #{sequenceName};
+    </select>
+</mapper>

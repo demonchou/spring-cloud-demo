@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.stori.account.web.module.domain.mapper.AccountLimitRecordMapper">
+
+    <resultMap id="accountLimitRecordMap" type="cn.com.stori.account.web.module.domain.entity.AccountLimitRecord">
+        <result property="recordId" column="RECORD_ID"/>
+        <result property="limitId" column="LIMIT_ID"/>
+        <result property="accountId" column="ACCOUNT_ID"/>
+        <result property="limitType" column="LIMIT_TYPE"/>
+        <result property="outBizNo" column="OUT_BIZ_NO"/>
+        <result property="outBizDate" column="OUT_BIZ_DATE"/>
+        <result property="operationType" column="OPERATION_TYPE"/>
+        <result property="operationAmount" column="OPERATION_AMOUNT"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="updateTime" column="UPDATE_TIME"/>
+    </resultMap>
+
+    <!-- 插入语句 -->
+    <insert id="insert" parameterType="cn.com.stori.account.web.module.domain.entity.AccountLimit">
+        INSERT INTO TB_ACCOUNT_LIMIT_RECORD
+        (RECORD_ID,
+         LIMIT_ID,
+         ACCOUNT_ID,
+         LIMIT_TYPE,
+         OUT_BIZ_NO,
+         OUT_BIZ_DATE,
+         OPERATION_TYPE,
+         OPERATION_AMOUNT,
+         CREATE_TIME,
+         UPDATE_TIME)
+        VALUES (#{recordId},
+                #{limitId},
+                #{accountId},
+                #{limitType},
+                #{outBizNo},
+                #{outBizDate},
+                #{operationType},
+                #{operationAmount},
+                NOW(3),
+                NOW(3))
+    </insert>
+
+    <select id="selectById" parameterType="java.lang.String" resultMap="accountLimitRecordMap">
+        SELECT * FROM TB_ACCOUNT_LIMIT_RECORD
+        WHERE RECORD_ID = #{recordId}
+    </select>
+</mapper>

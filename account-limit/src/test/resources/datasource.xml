@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+    <!-- 数据源 -->
+    <bean id="mysqlDataSourceTest" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close" primary="true">
+        <property name="url">
+            <value>${jdbc-stori-accting-mysql.druid.driver-url}</value>
+        </property>
+        <property name="username">
+            <value>${jdbc-stori-accting-mysql.user}</value>
+        </property>
+        <property name="password">
+            <value>${jdbc-stori-accting-mysql.password}</value>
+        </property>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize">
+            <value>${jdbc-stori-accting-mysql.druid.initialSize}</value>
+        </property>
+        <property name="minIdle">
+            <value>${jdbc-stori-accting-mysql.druid.minIdle}</value>
+        </property>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait">
+            <value>${jdbc-stori-accting-mysql.druid.maxWait}</value>
+        </property>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis">
+            <value>${jdbc-stori-accting-mysql.druid.timeBetweenEvictionRunsMillis}</value>
+        </property>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis">
+            <value>${jdbc-stori-accting-mysql.druid.minEvictableIdleTimeMillis}</value>
+        </property>
+        <!-- 用来检测连接是否有效的sql -->
+        <property name="validationQuery">
+            <value>${jdbc-stori-accting-mysql.druid.validationQuery}</value>
+        </property>
+        <property name="testWhileIdle" value="true"/>
+        <!-- 建议设置为false否则影响性能 -->
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <!-- 打开后，增强timeBetweenEvictionRunsMillis的周期性连接检查，minIdle内的空闲连接，每次检查强制验证连接有效性 -->
+        <property name="keepAlive" value="true"/>
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="100"/>
+
+        <!-- 配置监控统计拦截的filters -->
+        <!-- 监控统计用的filter:stat 日志用的filter:log4j 防御sql注入的filter:wall，配置多个用逗号 -->
+        <property name="filters" value="stat"/>
+    </bean>
+
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="mysqlDataSourceTest"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="mysqlDataSourceTest" />
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="typeAliasesPackage" value="cn.com.stori.account.web.module.domain.entity" />
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:mybatis/*.xml</value>
+            </array>
+        </property>
+    </bean>
+
+    <!-- scan for mappers and let them be autowired -->
+    <bean id="mysqlMapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.com.stori.account.web.module.domain.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+</beans>

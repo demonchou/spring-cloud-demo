@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.stori.account.web.module.domain.mapper.AccountLimitMapper">
+
+    <resultMap id="accountLimitMap" type="cn.com.stori.account.web.module.domain.entity.AccountLimit">
+        <result property="limitId" column="LIMIT_ID"/>
+        <result property="accountId" column="ACCOUNT_ID"/>
+        <result property="status" column="STATUS"/>
+        <result property="limitType" column="LIMIT_TYPE"/>
+        <result property="limitAmount" column="LIMIT_AMOUNT"/>
+        <result property="currency" column="CURRENCY"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="endDate" column="END_DATE"/>
+        <result property="version" column="VERSION"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="updateTime" column="UPDATE_TIME"/>
+    </resultMap>
+
+    <select id="selectById" parameterType="java.lang.String" resultMap="accountLimitMap">
+        SELECT * FROM TB_ACCOUNT_LIMIT
+        WHERE LIMIT_ID = #{limitId}
+    </select>
+
+    <!-- 动态查询条件 -->
+    <sql id="queryCondition">
+        <where>
+            <if test="limitId != null and limitId != ''">AND LIMIT_ID = #{limitId}</if>
+            <if test="accountId != null and accountId != ''">AND ACCOUNT_ID = #{accountId}</if>
+            <if test="limitType != null and limitType != ''">AND LIMIT_TYPE = #{limitType}</if>
+            <if test="currency != null and currency != ''">AND CURRENCY = #{currency}</if>
+            <if test="status != null and status != ''">AND STATUS = #{status}</if>
+        </where>
+    </sql>
+
+    <select id="pageQuery" parameterType="cn.com.stori.account.web.module.dto.AccountLimitQueryDto" resultMap="accountLimitMap">
+        SELECT * FROM TB_ACCOUNT_LIMIT
+        <include refid="queryCondition"/>
+        LIMIT #{beginRowNum}, #{pageSize}
+    </select>
+
+    <select id="count" parameterType="cn.com.stori.account.web.module.dto.AccountLimitQueryDto" resultType="java.lang.Integer">
+        SELECT count(1) FROM TB_ACCOUNT_LIMIT
+        <include refid="queryCondition"/>
+    </select>
+
+    <select id="selectByAccountIdAndLimitType" resultMap="accountLimitMap">
+        SELECT * FROM TB_ACCOUNT_LIMIT
+        WHERE ACCOUNT_ID = #{accountId} and LIMIT_TYPE = #{limitType}
+    </select>
+
+    <select id="selectActiveByAccountIdAndLimitType" resultMap="accountLimitMap">
+        SELECT *
+        FROM TB_ACCOUNT_LIMIT
+        WHERE ACCOUNT_ID = #{accountId}
+          and LIMIT_TYPE = #{limitType}
+          and status = 'ACTIVE'
+    </select>
+
+    <select id="lock" parameterType="java.lang.String" resultMap="accountLimitMap">
+        SELECT * FROM TB_ACCOUNT_LIMIT
+        WHERE LIMIT_ID = #{limitId} forupdate
+    </select>
+
+    <!-- 插入语句 -->
+    <insert id="insert" parameterType="cn.com.stori.account.web.module.domain.entity.AccountLimit">
+        INSERT INTO TB_ACCOUNT_LIMIT
+        (LIMIT_ID,
+         ACCOUNT_ID,
+         STATUS,
+         LIMIT_TYPE,
+         LIMIT_AMOUNT,
+         CURRENCY,
+         START_DATE,
+         END_DATE,
+         VERSION,
+         CREATE_TIME,
+         UPDATE_TIME)
+        VALUES (#{limitId},
+                #{accountId},
+                #{status},
+                #{limitType},
+                #{limitAmount},
+                #{currency},
+                #{startDate},
+                #{endDate},
+                0,
+                NOW(3),
+                NOW(3))
+    </insert>
+
+    <!-- 动态修改条件 -->
+    <sql id="updateCondition">
+        <set>
+            <if test = "status != null and status != ''">
+                STATUS = #{status},
+            </if>
+            <if test = "nameIndex != null and nameIndex != ''">
+                NAME_INDEX = #{nameIndex},
+            </if>
+            <if test = "updateTime != null ">
+                UPDATE_TIME = NOW(3),
+            </if>
+        </set>
+    </sql>
+
+    <!-- 更新语句 -->
+    <update id="update" parameterType="cn.com.stori.account.web.module.domain.entity.AccountLimit">
+        UPDATE TB_ACCOUNT_LIMIT
+        <include refid="updateCondition"/>
+        WHERE ACCOUNT_ID = #{accountId}
+    </update>
+    <!-- 更新语句 -->
+    <update id="updateLimitAmount" parameterType="cn.com.stori.account.web.module.domain.entity.AccountLimit">
+        UPDATE TB_ACCOUNT_LIMIT
+        SET VERSION      = VERSION + 1,
+            LIMIT_AMOUNT = #{limitAmount}
+        WHERE LIMIT_ID = #{limitId}
+          and VERSION = #{version}
+    </update>
+</mapper>

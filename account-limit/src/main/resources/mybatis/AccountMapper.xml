@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.com.stori.account.web.module.domain.mapper.AccountMapper">
+
+    <resultMap id="accountMap" type="cn.com.stori.account.web.module.domain.entity.Account">
+        <result property="accountId" column="ACCOUNT_ID"/>
+        <result property="status" column="STATUS"/>
+        <result property="nameEnc" column="NAME_ENC"/>
+        <result property="nameIndex" column="NAME_INDEX"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="updateTime" column="UPDATE_TIME"/>
+    </resultMap>
+
+    <!-- 动态查询条件 -->
+    <sql id="queryCondition">
+        <where>
+            <if test = "accountId != null and accountId != ''">
+                AND ACCOUNT_ID = #{accountId}
+            </if>
+            <if test = "status != null and status != ''">
+                AND STATUS = #{status}
+            </if>
+            <if test = "nameIndex != null and nameIndex != ''">
+                AND NAME_INDEX = #{nameIndex}
+            </if>
+            <if test="accountIds != null and accountIds.size > 0">
+                AND ACCOUNT_ID IN
+                <foreach item="item" index="index" collection="accountIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+
+    <select id="selectByAccountId" parameterType="java.lang.String" resultMap="accountMap">
+        SELECT * FROM TB_ACCOUNT
+        WHERE ACCOUNT_ID = #{accountId}
+    </select>
+
+    <select id="selectAllNormalAccountIds" resultType="java.lang.String">
+        SELECT ACCOUNT_ID FROM TB_ACCOUNT
+        WHERE STATUS = 'NORMAL'
+    </select>
+
+    <!-- 查询所有字段信息 -->
+    <select id="selectByMap" parameterType="java.util.HashMap" resultMap="accountMap">
+        SELECT * FROM TB_ACCOUNT
+        <include refid="queryCondition"/>
+    </select>
+
+    <!-- 插入语句 -->
+    <insert id="insert" parameterType="cn.com.stori.account.web.module.domain.entity.Account">
+        INSERT INTO TB_ACCOUNT
+        (ACCOUNT_ID,
+         STATUS,
+         NAME_ENC,
+         NAME_INDEX,
+         CREATE_TIME,
+         UPDATE_TIME)
+        VALUES (#{accountId},
+                #{status},
+                #{nameEnc},
+                #{nameIndex},
+                NOW(3),
+                NOW(3))
+    </insert>
+
+    <!-- 动态修改条件 -->
+    <sql id="updateCondition">
+        <set>
+            <if test = "status != null and status != ''">
+                STATUS = #{status},
+            </if>
+            <if test = "nameIndex != null and nameIndex != ''">
+                NAME_INDEX = #{nameIndex},
+            </if>
+            <if test = "updateTime != null ">
+                UPDATE_TIME = NOW(3),
+            </if>
+        </set>
+    </sql>
+
+    <!-- 更新语句 -->
+    <update id="update" parameterType="cn.com.stori.account.web.module.domain.entity.Account">
+        UPDATE TB_ACCOUNT
+        <include refid="updateCondition"/>
+        WHERE ACCOUNT_ID = #{accountId}
+    </update>
+</mapper>
